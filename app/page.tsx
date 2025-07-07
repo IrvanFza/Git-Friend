@@ -28,6 +28,73 @@ import TextAnimatedGradient from "@/components/ui/text-animated-gradient"
 import { AnimatedBeams } from "@/components/ui/animated-beams"
 import { Navbar } from "@/components/ui/navbar"
 
+// GitHub Stars Counter Component
+function GithubStarsCounter() {
+  const [stars, setStars] = useState<number | null>(null);
+  const [displayStars, setDisplayStars] = useState<number>(0);
+  useEffect(() => {
+    fetch("https://api.github.com/repos/krishn404/Git-Friend")
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data.stargazers_count === "number") {
+          setStars(data.stargazers_count);
+        }
+      });
+  }, []);
+  useEffect(() => {
+    if (typeof stars === "number") {
+      let start = 0;
+      const duration = 1200;
+      const startTime = performance.now();
+      function animate(now: number) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        setDisplayStars(Math.floor(progress * (stars - start) + start));
+        if (progress < 1) requestAnimationFrame(animate);
+        else setDisplayStars(stars);
+      }
+      requestAnimationFrame(animate);
+    }
+  }, [stars]);
+  return (
+    <a
+      href="https://github.com/krishn404/Git-Friend"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-black border border-yellow-400 shadow-[0_0_16px_2px_rgba(255,215,0,0.25)] hover:shadow-[0_0_24px_4px_rgba(255,215,0,0.4)] transition-all focus:outline-none focus:ring-2 focus:ring-yellow-400 group cursor-pointer mt-4"
+      style={{ textDecoration: "none" }}
+      aria-label="View GitHub repository and star count"
+    >
+      {/* GitHub Icon */}
+      <svg
+        aria-hidden="true"
+        height="22"
+        viewBox="0 0 16 16"
+        version="1.1"
+        width="22"
+        className="drop-shadow-[0_0_6px_rgba(255,215,0,0.7)]"
+      >
+        <path fill="url(#gold-gradient)" d="M8 12.027l-3.717 2.21.711-4.15-3.02-2.944 4.17-.606L8 2.5l1.856 3.997 4.17.606-3.02 2.944.711 4.15z"></path>
+        <defs>
+          <linearGradient id="gold-gradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#FFD700" />
+            <stop offset="50%" stopColor="#FFFACD" />
+            <stop offset="100%" stopColor="#FFC300" />
+          </linearGradient>
+        </defs>
+      </svg>
+      {/* Animated number (gold) */}
+      <span className="font-bold text-xl tabular-nums text-yellow-300 drop-shadow-[0_0_8px_rgba(255,215,0,0.7)]">
+        {displayStars.toLocaleString()}
+      </span>
+      {/* Label (shiny gold) */}
+      <span className="text-lg font-bold bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(255,215,0,0.7)]">
+        Stars on GitHub
+      </span>
+    </a>
+  );
+}
+
 export default function LandingPage() {
   const [email, setEmail] = useState("")
   const heroRef = useRef(null)
@@ -252,8 +319,9 @@ export default function LandingPage() {
                 Git Friend simplifies complex Git workflows with AI assistance, making version control intuitive and
                 collaborative for developers of all skill levels.
               </motion.p>
+              <GithubStarsCounter />
 
-              {/* Product Hunt Badge */}
+              {/* Product Hunt Badge
               <motion.div 
                 className="mt-8 flex justify-center"
                 initial={{ opacity: 0, y: 20 }}
@@ -273,7 +341,7 @@ export default function LandingPage() {
                     height="54" 
                   />
                 </a>
-              </motion.div>
+              </motion.div> */}
             </motion.div>
 
             {/* AI Chatbot Interface */}

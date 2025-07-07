@@ -40,6 +40,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { TextShimmerWave } from "@/components/core/text-shimmer-wave"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
+import type { Components } from 'react-markdown'
 
 export default function GenerateReadme() {
   // Array of README tips
@@ -472,6 +473,12 @@ export default function GenerateReadme() {
                     />
                   </div>
 
+                  {/* Info: Only public repositories supported */}
+                  <div className="mb-4 flex items-center gap-2 text-xs text-[hsl(var(--readme-text-muted))]">
+                    <AlertCircle className="h-4 w-4 text-[hsl(var(--readme-primary))]" />
+                    Only public GitHub repositories are supported.
+                  </div>
+
                   {isPro && (
                     <motion.div
                       className="mb-6 p-4 border border-[hsl(var(--readme-border))] rounded-md bg-[hsl(var(--readme-bg))/50"
@@ -644,6 +651,7 @@ export default function GenerateReadme() {
                             <div className="prose prose-sm max-w-none px-6 readme-preview">
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
+                                skipHtml={false}
                                 components={{
                                   img: ({ node, ...props }) => (
                                     <img {...props} className="max-w-full h-auto my-4" alt={props.alt || ""} />
@@ -669,12 +677,16 @@ export default function GenerateReadme() {
                                     />
                                   ),
                                   h3: ({ node, ...props }) => <h3 {...props} className="text-xl font-bold mt-5 mb-2" />,
-                                  code: ({ node, inline, className, ...props }) =>
-                                    inline ? (
-                                      <code {...props} className="px-1 py-0.5 bg-gray-100 rounded text-gray-800" />
-                                    ) : (
-                                      <code {...props} className="block overflow-x-auto text-gray-800" />
-                                    ),
+                                  code: ({inline, children, className, ...props}: {inline?: boolean, children?: React.ReactNode, className?: string, [key: string]: any}) => {
+                                    if (inline) {
+                                      return <code className={"px-1 py-0.5 bg-gray-100 rounded text-gray-800 " + (className || "")} {...props}>{children}</code>;
+                                    }
+                                    return (
+                                      <pre className="p-4 bg-gray-100 rounded-md overflow-x-auto my-4 border border-gray-200 text-gray-800">
+                                        <code className={className} {...props}>{children}</code>
+                                      </pre>
+                                    );
+                                  },
                                   pre: ({ node, ...props }) => (
                                     <pre
                                       {...props}
@@ -704,7 +716,12 @@ export default function GenerateReadme() {
                                   ),
                                 }}
                               >
-                                {generatedReadme}
+                                {/* Clean up markdown for better list rendering */}
+                                {generatedReadme
+                                  .replace(/^Here[^\n]*README[^\n]*\n*/i, "")
+                                  .replace(/\n\s*\*\s*\n/g, "\n") // Remove stray bullets
+                                  .replace(/\n\s*:\s*/g, ": ") // Fix colon spacing
+                                }
                               </ReactMarkdown>
                             </div>
                           </ScrollArea>
